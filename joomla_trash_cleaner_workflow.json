@@ -1,0 +1,407 @@
+{
+  "name": "Joomla Trash Cleaner",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        -80
+      ],
+      "id": "9438c5bf-f931-4050-b1d8-11dee77d44da",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "categories",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -80
+      ],
+      "id": "7a036195-b039-4652-aa43-c0c2f02aca07",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "returnAll": true,
+        "filters": {
+          "catid": "={{ $json.categories }}"
+        }
+      },
+      "type": "CUSTOM.joomla",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -224
+      ],
+      "id": "8c9ab267-41a5-4990-8df5-cff5330f632b",
+      "name": "Get catgeory articles",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "joomlaApi": {
+          "id": "gszjtJQ7jR3DVkHi",
+          "name": "Learn Joomla"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "articleId": "={{ $json.id }}",
+        "updateFields": {
+          "state": -2
+        }
+      },
+      "type": "CUSTOM.joomla",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        160
+      ],
+      "id": "1f5af826-9906-450d-b556-db82feeb3677",
+      "name": "Trash category articles",
+      "executeOnce": true,
+      "credentials": {
+        "joomlaApi": {
+          "id": "gszjtJQ7jR3DVkHi",
+          "name": "Learn Joomla"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "articleId": "={{ $('Get catgeory articles').item.json.id }}"
+      },
+      "type": "CUSTOM.joomla",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        160
+      ],
+      "id": "7b650506-cfe8-4e15-8f28-b2875f8b5ca8",
+      "name": "Delete category articles",
+      "executeOnce": true,
+      "credentials": {
+        "joomlaApi": {
+          "id": "gszjtJQ7jR3DVkHi",
+          "name": "Learn Joomla"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "category",
+        "operation": "update",
+        "categoryId": "={{ $('Split Out').item.json.categories }}",
+        "updateFields": {
+          "published": -2
+        }
+      },
+      "type": "CUSTOM.joomla",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        -208
+      ],
+      "id": "e65644b3-0c28-4ea2-8fc9-ccc59552c023",
+      "name": "Trash category",
+      "credentials": {
+        "joomlaApi": {
+          "id": "gszjtJQ7jR3DVkHi",
+          "name": "Learn Joomla"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "category",
+        "operation": "delete",
+        "categoryId": "={{ $('Split Out').item.json.categories }}"
+      },
+      "type": "CUSTOM.joomla",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        -208
+      ],
+      "id": "621f85be-9fc1-4ec5-89cb-8e5e2c4b95eb",
+      "name": "Delete category",
+      "credentials": {
+        "joomlaApi": {
+          "id": "gszjtJQ7jR3DVkHi",
+          "name": "Learn Joomla"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "27b1630a-ff85-44ce-9cb4-7d59e2297605",
+              "name": "categories",
+              "value": "[]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -272,
+        -80
+      ],
+      "id": "1a2d0ee5-0ab8-4039-bd31-ab646bb4fcd6",
+      "name": "Define categories to delete"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        176,
+        -80
+      ],
+      "id": "0501d90e-b71b-4c5a-830a-bd59ad54f818",
+      "name": "Loop Over Categories"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        832,
+        144
+      ],
+      "id": "aec31c63-b4fa-47fc-bbda-69d875161fd6",
+      "name": "Loop Over Articles"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bebce4a6-4b2d-44bb-84eb-1090a3f44568",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        -224
+      ],
+      "id": "d3c0e421-5be3-476d-871f-37ff08aa2fa9",
+      "name": "Has articles?"
+    },
+    {
+      "parameters": {
+        "content": "## If the category has articles? \nTrash and delete them so you can trash and clean the category itself.",
+        "height": 352,
+        "width": 752
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        0
+      ],
+      "id": "dcf910f9-1100-4e58-9cbb-12efda838c2a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Before you execute this workflow:\n \n1. **Make sure to install Joomla content (Joomreem)**  community node. [Github Repo](https://github.com/mabdelaziz77/n8n-nodes-joomreem-content)\n2. Create a Joomla Api Credentials like explained in the Github repository.\n3. Update the credentials for all Joomla nodes if not already updated.\n4. Fill in the category ids to delete in the Define categories to delete node, i.e. [1,2,3]",
+        "width": 736
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -528
+      ],
+      "id": "c5f842f5-a2fa-4511-9705-59bc86b58f69",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Define categories to delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Categories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get catgeory articles": {
+      "main": [
+        [
+          {
+            "node": "Has articles?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trash category articles": {
+      "main": [
+        [
+          {
+            "node": "Delete category articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete category articles": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trash category": {
+      "main": [
+        [
+          {
+            "node": "Delete category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define categories to delete": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete category": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Categories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Categories": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get catgeory articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Articles": {
+      "main": [
+        [
+          {
+            "node": "Trash category",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Trash category articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has articles?": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Articles",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Trash category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "fbddb568-f719-43e4-8b55-2fe5995f38ed",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aab8f77e5ac5cbbf5eb4599f60df84f0e7ab829c856c12685f9f97839db049bf"
+  },
+  "id": "J4hfveXDnMLP25Fw",
+  "tags": []
+}
